@@ -1,0 +1,6 @@
+tika
+translators
+pyenchant
+AnkiTools
+pandas
+openpyxl
