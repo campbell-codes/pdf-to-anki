@@ -1,3 +1,5 @@
 books/*
 exclude_cards/*
+output_decks/*
 !/**/.keep
+**/.DS_Store

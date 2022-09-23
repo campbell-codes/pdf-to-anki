@@ -1,16 +1,20 @@
-import sys, re, os
+import sys
 
-if len(sys.argv) != 3:
-    print("Usage: python main.py <YOUR_BOOK.pdf> <CHUNK_SIZE>")
-    print("e.g. python main.py books/mybook.pdf 1000")
+if len(sys.argv) != 4:
+    print("Usage: python main.py <YOUR_BOOK.pdf> <CHUNK_SIZE> <DECK_NAME_PREFIX>")
+    print("e.g. python main.py books/mybook.pdf 1000 \"My Book\"")
     exit(1)
 book_path = sys.argv[1]
 chunk_size = int(sys.argv[2])
+deck_prefix = sys.argv[3]
 
+import random, re, os
 from tika import parser
-import translators as ts
+import translators
 import enchant
 from ankipandas import Collection
+import genanki
+from gtts import gTTS
 
 def extract_question_from_cards(anki2_path):
     col = Collection(anki2_path)
@@ -36,7 +40,6 @@ def divide_chunks(l, n):
     # looping till length l
     for i in range(0, len(l), n):
         yield l[i:i + n]
-
 
 
 exclude_words = []
@@ -96,4 +99,51 @@ i = 1
 for word_set in word_sets:
     total_set += word_set
     print("Exclude + " + str(i) + " sets : " + str(calculate_book_percentage(total_set, all_words_in_book)) + "%")
+    i+=1
+
+def random_id():
+    return int(random.random()*100000000000)
+
+media_model = genanki.Model(
+  random_id(),
+  'Simple Model with Media',
+  fields=[
+    {'name': 'Question'},
+    {'name': 'Answer'},
+    {'name': 'MyMedia'},                                  # ADD THIS
+  ],
+  templates=[
+    {
+      'name': 'Card 1',
+      'qfmt': '{{Question}}<br>{{MyMedia}}',              # AND THIS
+      'afmt': '{{FrontSide}}<hr id="answer">{{Answer}}',
+    },
+  ])
+
+def translate_word(word):
+    translation = translators.google(word, from_language="es", to_language="en")
+    if translation.lower() != word:
+        return translation
+
+def get_media(word):
+    file_path = "output_decks/media/"+word+".mp3"
+    gTTS(text=word, lang="es", slow=False).save(file_path)
+    return (file_path, "[sound:"+word+".mp3]")
+
+word_sets = [word_sets[0]]
+i = 1
+for word_set in word_sets:
+    deck_name = deck_prefix + " " + str(i)
+    my_deck = genanki.Deck(random_id(),deck_name )
+    media_files = []
+    for word in word_set:
+        translation = translate_word(word)
+        if translation:
+            media = get_media(word)
+            my_note = genanki.Note(model=media_model, fields=[word, translation, media[1]])
+            media_files.append(media[0])
+            my_deck.add_note(my_note)
+    my_package = genanki.Package(my_deck)
+    my_package.media_files = media_files
+    my_package.write_to_file("output_decks/"+deck_name+'.apkg')
     i+=1

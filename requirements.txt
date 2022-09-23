@@ -4,3 +4,5 @@ pyenchant
 AnkiTools
 pandas
 openpyxl
+genanki
+gTTS
