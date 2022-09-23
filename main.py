@@ -130,8 +130,9 @@ def get_media(word):
     gTTS(text=word, lang="es", slow=False).save(file_path)
     return (file_path, "[sound:"+word+".mp3]")
 
-word_sets = [word_sets[0]]
 i = 1
+print("Running translations and generating sets this could take a while!")
+print("Media output to output_decks/media you should see new files being generated there for each new word")
 for word_set in word_sets:
     deck_name = deck_prefix + " " + str(i)
     my_deck = genanki.Deck(random_id(),deck_name )
@@ -145,5 +146,7 @@ for word_set in word_sets:
             my_deck.add_note(my_note)
     my_package = genanki.Package(my_deck)
     my_package.media_files = media_files
-    my_package.write_to_file("output_decks/"+deck_name+'.apkg')
+    output_path = "output_decks/"+deck_name+'.apkg'
+    my_package.write_to_file(output_path)
+    print("Deck available: " + output_path)
     i+=1
