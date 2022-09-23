@@ -1,7 +1,11 @@
 ## Description
 Builds Anki language collections from books if the books are pdfs, for Spanish only
 
-### Install Pre Reqs
+### Warning
+The code in here is pretty hacky and just for personal use would probably need modification for others and was written very quickly. This will almost certainly not work out of the box and is not an example of well written code.
+
+### Install Pre-reqs
+
 ```
 pip install -r requirements.txt
 ```
